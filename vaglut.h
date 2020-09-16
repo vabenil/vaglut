@@ -74,17 +74,52 @@ int vaglut_load_file(char **output_buf, const char *file_name)
 
 
 VAGLUT_DEF
-void vaglut_clear_errors();
+void vaglut_clear_errors()
+{
+    while (glGetError() != GL_NO_ERROR);
+} 
 
 
 VAGLUT_DEF
-GLboolean vaglut_check_errors();
+GLboolean vaglut_check_errors()
+{
+    GLenum error;
+    while ((error = glGetError())) {
+        fprintf(stderr, "GL_ERROR: %d\n", error);
+        return 1;
+    }
+    return 0;
+} 
 
 
 VAGLUT_DEF
 GLuint vaglut_shader_check_error(
         GLuint shader, GLboolean is_program,
-        GLenum flag, const char *error_message);
+        GLenum flag, const char *error_message)
+{
+    int success = GL_FALSE;
+    char error_log[1024] = {0};
+    int log_size = 0;
+
+    is_program
+        ? glGetProgramiv(shader, flag, &success)
+        : glGetShaderiv(shader, flag, &success);
+
+    if (!success) {
+        is_program
+            ? glGetProgramInfoLog(
+                    shader, sizeof(error_log), &log_size, error_log)
+            : glGetShaderInfoLog(
+                    shader, sizeof(error_log), &log_size, error_log);
+
+        if (log_size) {
+            fprintf( stderr, "%s\n", error_message);
+            fprintf(stderr, "%s\n", error_log);
+            /* saveErrorLog( error_log ); */
+        }
+    }
+    return success;
+}
 
 
 VAGLUT_DEF
