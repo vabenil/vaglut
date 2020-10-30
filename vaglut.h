@@ -9,10 +9,8 @@
 #include <unistd.h>
 
 
-#ifdef VAGLUT_STATIC
+#ifndef VAGLUT_STATIC
 #define VAGLUT_DEF static
-#else
-#define VAGLUT_DEF
 #endif /* VAGLUT_STATIC */
 
 
@@ -21,6 +19,7 @@ void vaglut_set_wireframe_mode(GLboolean wiref_mode)
 {
     glPolygonMode(GL_FRONT_AND_BACK, wiref_mode ? GL_LINE : GL_FILL);
 }
+
 
 VAGLUT_DEF
 int vaglut_load_file(char **output_buf, const char *file_name)
