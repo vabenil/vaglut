@@ -9,8 +9,32 @@
 #include <unistd.h>
 
 
+/* Disable warnings */
+#if defined(__clang__)
+
+#define VAGLUT_WARNINGS_DISABLE \
+    _Pragma("clang diagnostic push")
+    _Pragma("clang diagnostic ignored \"-Wunused-function\"")
+#define VAGLUT_WARNINGS_ENABLE \
+    _Pragma("clang diagnostic pop")
+
+#elif defined(__GNUC__)
+
+#define VAGLUT_WARNINGS_DISABLE \
+    _Pragma("GCC diagnostic push")
+    _Pragma("GCC diagnostic ignored \"-Wunused-function\"")
+#define VAGLUT_WARNINGS_ENABLE \
+    _Pragma("GCC diagnostic pop")
+
+#endif
+
+
+VAGLUT_WARNINGS_DISABLE
+
 #ifndef VAGLUT_STATIC
 #define VAGLUT_DEF static
+#else
+#define VAGLUT_DEF
 #endif /* VAGLUT_STATIC */
 
 
@@ -204,19 +228,22 @@ GLuint vaglut_shaders_compile_src(
     f_shader = frag_shader_src ? glCreateShader(GL_FRAGMENT_SHADER) : 0;
     program = glCreateProgram(); 
 
-    if (vert_shader_src)
-    if (!vaglut_shader_compile_src(v_shader, vert_shader_src)) {
-        return GL_FALSE;
+    if (vert_shader_src) {
+        if (!vaglut_shader_compile_src(v_shader, vert_shader_src)) {
+            return GL_FALSE;
+        }
     }
 
-    if (geom_shader_src)
-    if (!vaglut_shader_compile_src(g_shader, geom_shader_src)) {
-        return GL_FALSE;
+    if (geom_shader_src) {
+        if (!vaglut_shader_compile_src(g_shader, geom_shader_src)) {
+            return GL_FALSE;
+        }
     }
 
-    if (frag_shader_src)
-    if (!vaglut_shader_compile_src(f_shader, frag_shader_src)) {
-        return GL_FALSE;
+    if (frag_shader_src) {
+        if (!vaglut_shader_compile_src(f_shader, frag_shader_src)) {
+            return GL_FALSE;
+        }
     }
 
     if (!vaglut_program_attach_shaders(
@@ -252,5 +279,7 @@ GLuint vaglut_shaders_compile_f(
     return program;
 } 
 
+
+VAGLUT_WARNINGS_ENABLE
 
 #endif /* VAGLUT_H */
